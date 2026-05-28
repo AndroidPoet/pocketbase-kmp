@@ -1,0 +1,44 @@
+site_name: PocketBase KMP
+site_description: Kotlin Multiplatform SDK for PocketBase
+site_url: https://androidpoet.github.io/pocketbase-kmp/
+repo_url: https://github.com/AndroidPoet/pocketbase-kmp
+repo_name: AndroidPoet/pocketbase-kmp
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.highlight
+    - search.share
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+
+plugins:
+  - search
+
+nav:
+  - Home: README.md
+  - Getting Started: guides/getting-started.md
+  - Authentication Guide: guides/authentication.md
+  - Database Guide: guides/database.md
+  - Storage Guide: guides/storage.md
+  - Realtime Guide: guides/realtime.md
+  - Realtime Chat Sample: realtime-chat-sample.md
+  - Functions Guide: guides/functions.md
+  - API Overview: api/overview.md
+  - Deep Dive: deep-dive.md
