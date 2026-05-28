@@ -67,3 +67,9 @@ val realtime = createRealtimeClient(pb.client)
 ```
 
 Note: `./gradlew test` also runs Android unit-test tasks and requires local Android SDK configuration.
+
+## Attribution
+
+This SDK targets the PocketBase platform and APIs.  
+PocketBase official website: https://pocketbase.io/  
+PocketBase GitHub organization: https://github.com/pocketbase

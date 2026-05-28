@@ -12,3 +12,8 @@ PocketBase KMP is a Kotlin Multiplatform SDK with modular architecture.
 - `pocketbase-realtime`: realtime subscribe/unsubscribe
 
 Use the left navigation to jump to setup, guides, and API pages.
+
+## Attribution
+
+PocketBase KMP is an independent community SDK for the PocketBase platform.  
+Official PocketBase website: https://pocketbase.io/
