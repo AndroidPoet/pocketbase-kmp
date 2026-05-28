@@ -65,15 +65,3 @@ val realtime = createRealtimeClient(pb.client)
 ```
 
 Note: `./gradlew test` also runs Android unit-test tasks and requires local Android SDK configuration.
-
-## Publish to Maven Central
-
-GitHub workflow is already configured (`.github/workflows/publish.yml`).
-
-Required repository secrets:
-
-- `MAVEN_CENTRAL_USERNAME` (or `OSSRH_USERNAME`)
-- `MAVEN_CENTRAL_PASSWORD` (or `OSSRH_PASSWORD`)
-- `SIGNING_KEY_ID`
-- `SIGNING_KEY`
-- `SIGNING_PASSWORD`
