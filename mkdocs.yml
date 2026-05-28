@@ -32,13 +32,18 @@ plugins:
   - search
 
 nav:
-  - Home: README.md
+  - Home: docs/index.md
   - Getting Started: guides/getting-started.md
   - Authentication Guide: guides/authentication.md
-  - Database Guide: guides/database.md
-  - Storage Guide: guides/storage.md
+  - Records Guide: guides/records.md
+  - Files Guide: guides/files.md
   - Realtime Guide: guides/realtime.md
-  - Realtime Chat Sample: realtime-chat-sample.md
-  - Functions Guide: guides/functions.md
+  - Admin Services: guides/admin-services.md
   - API Overview: api/overview.md
-  - Deep Dive: deep-dive.md
+  - API:
+    - Client: api/client.md
+    - Auth: api/auth.md
+    - Records: api/records.md
+    - Files: api/files.md
+    - Realtime: api/realtime.md
+  - FAQ: faq.md

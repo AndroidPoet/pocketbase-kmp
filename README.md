@@ -16,7 +16,7 @@ Kotlin Multiplatform SDK for PocketBase with a modular architecture (same style 
 
 ```kotlin
 [versions]
-pocketbase-kmp = "0.3.1"
+pocketbase-kmp = "0.0.1"
 
 [libraries]
 pocketbase-client = { module = "io.github.androidpoet:pocketbase-client", version.ref = "pocketbase-kmp" }
