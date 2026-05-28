@@ -37,6 +37,22 @@ val files = createFilesClient(pb.client)
 val realtime = createRealtimeClient(pb.client)
 ```
 
+## Result Handling Example
+
+```kotlin
+val result = records.getList(collectionIdOrName = "tasks")
+
+when (result) {
+    is PocketBaseResult.Success -> {
+        val items = result.value.items
+        println("Fetched ${items.size} records")
+    }
+    is PocketBaseResult.Failure -> {
+        println("Request failed: ${result.error.message}")
+    }
+}
+```
+
 ## Module Overview
 
 - `pocketbase-core`: shared result and core models
