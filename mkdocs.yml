@@ -32,7 +32,7 @@ plugins:
   - search
 
 nav:
-  - Home: docs/index.md
+  - Home: index.md
   - Getting Started: guides/getting-started.md
   - Authentication Guide: guides/authentication.md
   - Records Guide: guides/records.md
