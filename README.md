@@ -1,3 +1,5 @@
+![PocketBase KMP Header](docs/assets/images/header.png)
+
 # PocketBase KMP
 
 Kotlin Multiplatform SDK for PocketBase with a modular architecture (same style as `supabase-kmp`).
