@@ -1,34 +1,79 @@
-# pocketbase-kmp
+# PocketBase KMP
 
-Kotlin Multiplatform SDK for PocketBase, built with the same modular architecture style as this workspace's `supabase-kmp`.
+Kotlin Multiplatform SDK for PocketBase with a modular architecture (same style as `supabase-kmp`).
 
-## Modules
+## Highlights
 
-- `pocketbase-core`: result/error/model primitives.
-- `pocketbase-client`: HTTP client, auth store, and admin services (`health`, `collections`, `batch`, `backups`, `logs`, `settings`, `crons`).
-- `pocketbase-auth`: record auth flows (`auth-with-password`, `auth-refresh`, OAuth2 code, OTP, email/password reset/verification, impersonate).
-- `pocketbase-records`: records CRUD, list, and full-list pagination.
-- `pocketbase-files`: file URL generation and file token.
-- `pocketbase-realtime`: API scaffold for realtime subscriptions (transport implementation is currently beta).
+- KMP-first module split (`core`, `client`, `auth`, `records`, `files`, `realtime`)
+- Coroutine-based APIs
+- Result-based error handling (`PocketBaseResult`)
+- Service-oriented client with admin and data operations
+- CI/CD + Maven Central publish workflow templates included
+
+## Install
+
+```kotlin
+[versions]
+pocketbase-kmp = "0.3.1"
+
+[libraries]
+pocketbase-client = { module = "io.github.androidpoet:pocketbase-client", version.ref = "pocketbase-kmp" }
+pocketbase-auth = { module = "io.github.androidpoet:pocketbase-auth", version.ref = "pocketbase-kmp" }
+pocketbase-records = { module = "io.github.androidpoet:pocketbase-records", version.ref = "pocketbase-kmp" }
+pocketbase-files = { module = "io.github.androidpoet:pocketbase-files", version.ref = "pocketbase-kmp" }
+pocketbase-realtime = { module = "io.github.androidpoet:pocketbase-realtime", version.ref = "pocketbase-kmp" }
+```
 
 ## Quick Start
 
 ```kotlin
 val pb = PocketBase.create("http://127.0.0.1:8090")
-val records = createRecordsClient(pb.client)
+
 val auth = createAuthClient(pb.client)
+val records = createRecordsClient(pb.client)
 val files = createFilesClient(pb.client)
+val realtime = createRealtimeClient(pb.client)
 ```
 
-## Service Coverage (vs dart-sdk)
+## Module Overview
 
-- Covered now: collections, records CRUD/full-list, batch (JSON), files URL/token, auth record flows, health, logs, backups, settings, crons.
-- Pending for strict parity: realtime protocol-complete transport and multipart batch/files parity edge cases.
+- `pocketbase-core`: shared result and core models
+- `pocketbase-client`: transport, auth store, and admin services
+- `pocketbase-auth`: record-auth endpoints and auth flows
+- `pocketbase-records`: CRUD, list, and full-list pagination
+- `pocketbase-files`: file token + file URL helpers
+- `pocketbase-realtime`: realtime connection, subscribe/unsubscribe, reconnect strategy
 
-## Tests
+## Implemented Services
 
-Run:
+- Health: `/api/health`
+- Collections: CRUD + truncate
+- Records: list/full-list/get/create/update/upsert/delete
+- Batch: JSON + multipart file request mapping
+- Files: token + URL helpers
+- Auth: methods/password refresh/OAuth2 code/OTP/reset/verify/email-change/impersonate
+- Logs: list/get/stats
+- Backups: list/create/restore/delete
+- Settings: get/update/test endpoints
+- Crons: list/run
+- Realtime: connect/subscribe/unsubscribe/unsubscribeAll/event listener/reconnect
+
+## Testing
 
 ```bash
-./gradlew test
+./gradlew jvmTest
 ```
+
+Note: `./gradlew test` also runs Android unit-test tasks and requires local Android SDK configuration.
+
+## Publish to Maven Central
+
+GitHub workflow is already configured (`.github/workflows/publish.yml`).
+
+Required repository secrets:
+
+- `MAVEN_CENTRAL_USERNAME` (or `OSSRH_USERNAME`)
+- `MAVEN_CENTRAL_PASSWORD` (or `OSSRH_PASSWORD`)
+- `SIGNING_KEY_ID`
+- `SIGNING_KEY`
+- `SIGNING_PASSWORD`
