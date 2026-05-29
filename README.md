@@ -216,18 +216,6 @@ Avoid running `./gradlew test` or `allTests` for local verification unless you i
 - Some admin APIs require superuser authentication based on PocketBase API rules.
 - PocketBase is pre-1.0 and may introduce API changes between server versions.
 
-## Publishing
-
-Publishing workflow is configured at `.github/workflows/publish.yml`.
-
-Required repository secrets:
-
-- `MAVEN_CENTRAL_USERNAME` or `OSSRH_USERNAME`
-- `MAVEN_CENTRAL_PASSWORD` or `OSSRH_PASSWORD`
-- `SIGNING_KEY_ID`
-- `SIGNING_KEY`
-- `SIGNING_PASSWORD`
-
 ## License
 
 MIT. See [LICENSE](LICENSE).
