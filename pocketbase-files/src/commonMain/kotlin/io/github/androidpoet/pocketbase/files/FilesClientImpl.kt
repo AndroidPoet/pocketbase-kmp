@@ -9,10 +9,21 @@ import kotlinx.serialization.json.jsonPrimitive
 public class FilesClientImpl(
     private val client: PocketBaseClient,
 ) : FilesClient {
-    override fun getUrl(collectionIdOrName: String, recordId: String, filename: String, thumb: String?): String =
+    override fun getUrl(
+        collectionIdOrName: String,
+        recordId: String,
+        filename: String,
+        thumb: String?,
+        token: String?,
+        download: Boolean?,
+    ): String =
         client.buildUrl(
             "/api/files/$collectionIdOrName/$recordId/$filename",
-            mapOf("thumb" to thumb),
+            mapOf(
+                "thumb" to thumb,
+                "token" to token,
+                "download" to download?.toString(),
+            ),
         )
 
     override suspend fun getToken(): PocketBaseResult<FileToken> =

@@ -2,6 +2,7 @@ package io.github.androidpoet.pocketbase.client
 
 import io.github.androidpoet.pocketbase.core.result.PocketBaseError
 import io.github.androidpoet.pocketbase.core.result.PocketBaseResult
+import io.github.androidpoet.pocketbase.core.result.toPocketBaseResult
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -16,6 +17,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.http.Headers
+import io.ktor.http.URLBuilder
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
@@ -90,15 +92,16 @@ public class PocketBaseClientImpl(
     override fun buildUrl(path: String, query: Map<String, String?>): String {
         val normalized = "${config.baseUrl.trimEnd('/')}/${path.trimStart('/')}"
         if (query.isEmpty()) return normalized
-        val parts = query.entries.filter { it.value != null }.joinToString("&") { "${it.key}=${it.value}" }
-        return if (parts.isBlank()) normalized else "$normalized?$parts"
+        val builder = URLBuilder(normalized)
+        query.forEach { (key, value) ->
+            if (value != null) builder.parameters.append(key, value)
+        }
+        return builder.buildString()
     }
 
     private inline fun <T> request(block: () -> T): PocketBaseResult<T> =
-        try {
-            PocketBaseResult.Success(block())
-        } catch (t: Throwable) {
-            PocketBaseResult.Failure(PocketBaseError(message = t.message ?: "Request failed", cause = t))
+        runCatching(block).toPocketBaseResult { throwable ->
+            PocketBaseError(message = throwable.message ?: "Request failed", cause = throwable)
         }
 
     private fun HttpRequestBuilder.applyHeaders() {

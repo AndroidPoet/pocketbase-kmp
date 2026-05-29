@@ -15,10 +15,28 @@ public class HealthService(
 public class CollectionsService(
     private val client: PocketBaseClient,
 ) {
-    public suspend fun list(page: Int = 1, perPage: Int = 30): PocketBaseResult<JsonObject> =
-        client.get("/api/collections", mapOf("page" to page.toString(), "perPage" to perPage.toString()))
+    public suspend fun list(
+        page: Int = 1,
+        perPage: Int = 30,
+        sort: String? = null,
+        filter: String? = null,
+        fields: String? = null,
+        skipTotal: Boolean? = null,
+    ): PocketBaseResult<JsonObject> =
+        client.get(
+            "/api/collections",
+            mapOf(
+                "page" to page.toString(),
+                "perPage" to perPage.toString(),
+                "sort" to sort,
+                "filter" to filter,
+                "fields" to fields,
+                "skipTotal" to skipTotal?.toString(),
+            ),
+        )
 
-    public suspend fun getOne(idOrName: String): PocketBaseResult<JsonObject> = client.get("/api/collections/$idOrName")
+    public suspend fun getOne(idOrName: String, fields: String? = null): PocketBaseResult<JsonObject> =
+        client.get("/api/collections/$idOrName", mapOf("fields" to fields))
     public suspend fun create(body: JsonObject): PocketBaseResult<JsonObject> = client.post("/api/collections", body)
     public suspend fun update(idOrName: String, body: JsonObject): PocketBaseResult<JsonObject> = client.patch("/api/collections/$idOrName", body)
     public suspend fun delete(idOrName: String): PocketBaseResult<JsonObject> = client.delete("/api/collections/$idOrName")

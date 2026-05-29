@@ -11,6 +11,7 @@ import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.HttpHeaders
 import io.ktor.utils.io.readUTF8Line
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -126,7 +127,8 @@ public class RealtimeClientImpl(
                         if (attempts > maxRetryAttempts) break
                         reconnect(attempts)
                     }
-                } catch (_: Throwable) {
+                } catch (t: Throwable) {
+                    if (t is CancellationException) throw t
                     attempts += 1
                     if (attempts > maxRetryAttempts || closed) break
                     reconnect(attempts)

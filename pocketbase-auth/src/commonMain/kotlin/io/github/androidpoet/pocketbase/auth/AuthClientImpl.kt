@@ -12,18 +12,26 @@ import kotlinx.serialization.json.put
 public class AuthClientImpl(
     private val client: PocketBaseClient,
 ) : AuthClient {
-    override suspend fun authMethods(collectionIdOrName: String): PocketBaseResult<kotlinx.serialization.json.JsonObject> =
-        client.get("/api/collections/$collectionIdOrName/auth-methods")
+    override suspend fun authMethods(collectionIdOrName: String, fields: String?): PocketBaseResult<kotlinx.serialization.json.JsonObject> =
+        client.get("/api/collections/$collectionIdOrName/auth-methods", mapOf("fields" to fields))
 
     override suspend fun authWithPassword(
         collectionIdOrName: String,
         identity: String,
         password: String,
+        identityField: String?,
+        expand: String?,
+        fields: String?,
     ): PocketBaseResult<RecordAuth> {
-        val path = "/api/collections/$collectionIdOrName/auth-with-password"
+        val path = pathWithQuery(
+            "/api/collections/$collectionIdOrName/auth-with-password",
+            "expand" to expand,
+            "fields" to fields,
+        )
         val body = buildJsonObject {
             put("identity", identity)
             put("password", password)
+            identityField?.let { put("identityField", it) }
         }
         return when (val res = client.post(path, body)) {
             is PocketBaseResult.Success -> {
@@ -38,8 +46,12 @@ public class AuthClientImpl(
         }
     }
 
-    override suspend fun refresh(collectionIdOrName: String): PocketBaseResult<RecordAuth> {
-        val path = "/api/collections/$collectionIdOrName/auth-refresh"
+    override suspend fun refresh(collectionIdOrName: String, expand: String?, fields: String?): PocketBaseResult<RecordAuth> {
+        val path = pathWithQuery(
+            "/api/collections/$collectionIdOrName/auth-refresh",
+            "expand" to expand,
+            "fields" to fields,
+        )
         return when (val res = client.post(path, null)) {
             is PocketBaseResult.Success -> {
                 val token = res.value["token"]?.jsonPrimitive?.contentOrNull
@@ -59,14 +71,22 @@ public class AuthClientImpl(
         code: String,
         codeVerifier: String?,
         redirectUrl: String?,
+        createData: kotlinx.serialization.json.JsonObject?,
+        expand: String?,
+        fields: String?,
     ): PocketBaseResult<RecordAuth> {
         val body = buildJsonObject {
             put("provider", provider)
             put("code", code)
             codeVerifier?.let { put("codeVerifier", it) }
             redirectUrl?.let { put("redirectUrl", it) }
+            createData?.let { put("createData", it) }
         }
-        val path = "/api/collections/$collectionIdOrName/auth-with-oauth2"
+        val path = pathWithQuery(
+            "/api/collections/$collectionIdOrName/auth-with-oauth2",
+            "expand" to expand,
+            "fields" to fields,
+        )
         return when (val res = client.post(path, body)) {
             is PocketBaseResult.Success -> {
                 val token = res.value["token"]?.jsonPrimitive?.contentOrNull
@@ -125,9 +145,19 @@ public class AuthClientImpl(
     ): PocketBaseResult<kotlinx.serialization.json.JsonObject> =
         client.post("/api/collections/$collectionIdOrName/request-otp", buildJsonObject { put("email", email) })
 
-    override suspend fun authWithOtp(collectionIdOrName: String, otpId: String, password: String): PocketBaseResult<RecordAuth> {
+    override suspend fun authWithOtp(
+        collectionIdOrName: String,
+        otpId: String,
+        password: String,
+        expand: String?,
+        fields: String?,
+    ): PocketBaseResult<RecordAuth> {
         val res = client.post(
-            "/api/collections/$collectionIdOrName/auth-with-otp",
+            pathWithQuery(
+                "/api/collections/$collectionIdOrName/auth-with-otp",
+                "expand" to expand,
+                "fields" to fields,
+            ),
             buildJsonObject {
                 put("otpId", otpId)
                 put("password", password)
@@ -146,9 +176,19 @@ public class AuthClientImpl(
         }
     }
 
-    override suspend fun impersonate(collectionIdOrName: String, recordId: String, duration: Int?): PocketBaseResult<RecordAuth> {
+    override suspend fun impersonate(
+        collectionIdOrName: String,
+        recordId: String,
+        duration: Int?,
+        expand: String?,
+        fields: String?,
+    ): PocketBaseResult<RecordAuth> {
         val res = client.post(
-            "/api/collections/$collectionIdOrName/impersonate/$recordId",
+            pathWithQuery(
+                "/api/collections/$collectionIdOrName/impersonate/$recordId",
+                "expand" to expand,
+                "fields" to fields,
+            ),
             duration?.let { buildJsonObject { put("duration", it) } },
         )
         return when (res) {
@@ -168,5 +208,12 @@ public class AuthClientImpl(
     private fun unit(result: PocketBaseResult<*>): PocketBaseResult<Unit> = when (result) {
         is PocketBaseResult.Success -> PocketBaseResult.Success(Unit)
         is PocketBaseResult.Failure -> result
+    }
+
+    private fun pathWithQuery(path: String, vararg params: Pair<String, String?>): String {
+        val encoded = params
+            .filter { it.second != null }
+            .joinToString("&") { "${it.first}=${it.second}" }
+        return if (encoded.isBlank()) path else "$path?$encoded"
     }
 }

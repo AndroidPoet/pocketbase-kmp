@@ -16,10 +16,22 @@ public class RecordsClientImpl(
         page: Int,
         perPage: Int,
         filter: String?,
+        sort: String?,
+        expand: String?,
+        fields: String?,
+        skipTotal: Boolean?,
     ): PocketBaseResult<PocketBaseListResponse> {
         val res = client.get(
             "/api/collections/$collectionIdOrName/records",
-            mapOf("page" to page.toString(), "perPage" to perPage.toString(), "filter" to filter),
+            mapOf(
+                "page" to page.toString(),
+                "perPage" to perPage.toString(),
+                "filter" to filter,
+                "sort" to sort,
+                "expand" to expand,
+                "fields" to fields,
+                "skipTotal" to skipTotal?.toString(),
+            ),
         )
         return when (res) {
             is PocketBaseResult.Success -> {
@@ -43,11 +55,26 @@ public class RecordsClientImpl(
         collectionIdOrName: String,
         batch: Int,
         filter: String?,
+        sort: String?,
+        expand: String?,
+        fields: String?,
+        skipTotal: Boolean?,
     ): PocketBaseResult<List<JsonObject>> {
         val aggregated = mutableListOf<JsonObject>()
         var page = 1
         while (true) {
-            when (val res = getList(collectionIdOrName, page = page, perPage = batch, filter = filter)) {
+            when (
+                val res = getList(
+                    collectionIdOrName = collectionIdOrName,
+                    page = page,
+                    perPage = batch,
+                    filter = filter,
+                    sort = sort,
+                    expand = expand,
+                    fields = fields,
+                    skipTotal = skipTotal,
+                )
+            ) {
                 is PocketBaseResult.Failure -> return res
                 is PocketBaseResult.Success -> {
                     aggregated += res.value.items
@@ -58,18 +85,25 @@ public class RecordsClientImpl(
         }
     }
 
-    override suspend fun getOne(collectionIdOrName: String, id: String): PocketBaseResult<JsonObject> =
-        client.get("/api/collections/$collectionIdOrName/records/$id")
+    override suspend fun getOne(collectionIdOrName: String, id: String, expand: String?, fields: String?): PocketBaseResult<JsonObject> =
+        client.get("/api/collections/$collectionIdOrName/records/$id", mapOf("expand" to expand, "fields" to fields))
 
-    override suspend fun create(collectionIdOrName: String, body: JsonObject): PocketBaseResult<JsonObject> =
-        client.post("/api/collections/$collectionIdOrName/records", body)
+    override suspend fun create(collectionIdOrName: String, body: JsonObject, expand: String?, fields: String?): PocketBaseResult<JsonObject> =
+        client.post(pathWithQuery("/api/collections/$collectionIdOrName/records", "expand" to expand, "fields" to fields), body)
 
-    override suspend fun update(collectionIdOrName: String, id: String, body: JsonObject): PocketBaseResult<JsonObject> =
-        client.patch("/api/collections/$collectionIdOrName/records/$id", body)
+    override suspend fun update(collectionIdOrName: String, id: String, body: JsonObject, expand: String?, fields: String?): PocketBaseResult<JsonObject> =
+        client.patch(pathWithQuery("/api/collections/$collectionIdOrName/records/$id", "expand" to expand, "fields" to fields), body)
 
     override suspend fun upsert(collectionIdOrName: String, body: JsonObject): PocketBaseResult<JsonObject> =
         client.put("/api/collections/$collectionIdOrName/records", body)
 
     override suspend fun delete(collectionIdOrName: String, id: String): PocketBaseResult<JsonObject> =
         client.delete("/api/collections/$collectionIdOrName/records/$id")
+
+    private fun pathWithQuery(path: String, vararg params: Pair<String, String?>): String {
+        val encoded = params
+            .filter { it.second != null }
+            .joinToString("&") { "${it.first}=${it.second}" }
+        return if (encoded.isBlank()) path else "$path?$encoded"
+    }
 }
