@@ -17,14 +17,20 @@ public interface RecordsClient {
     ): PocketBaseResult<PocketBaseListResponse>
     public suspend fun getFullList(
         collectionIdOrName: String,
-        batch: Int = 200,
+        batch: Int = 1000,
         filter: String? = null,
         sort: String? = null,
         expand: String? = null,
         fields: String? = null,
-        skipTotal: Boolean? = null,
+        skipTotal: Boolean = true,
     ): PocketBaseResult<List<JsonObject>>
     public suspend fun getOne(collectionIdOrName: String, id: String, expand: String? = null, fields: String? = null): PocketBaseResult<JsonObject>
+    public suspend fun getFirstListItem(
+        collectionIdOrName: String,
+        filter: String,
+        expand: String? = null,
+        fields: String? = null,
+    ): PocketBaseResult<JsonObject>
     public suspend fun create(collectionIdOrName: String, body: JsonObject, expand: String? = null, fields: String? = null): PocketBaseResult<JsonObject>
     public suspend fun update(collectionIdOrName: String, id: String, body: JsonObject, expand: String? = null, fields: String? = null): PocketBaseResult<JsonObject>
     public suspend fun upsert(collectionIdOrName: String, body: JsonObject): PocketBaseResult<JsonObject>

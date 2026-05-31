@@ -2,6 +2,7 @@ package io.github.androidpoet.pocketbase.records
 
 import io.github.androidpoet.pocketbase.client.PocketBaseClient
 import io.github.androidpoet.pocketbase.core.models.PocketBaseListResponse
+import io.github.androidpoet.pocketbase.core.result.PocketBaseError
 import io.github.androidpoet.pocketbase.core.result.PocketBaseResult
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.int
@@ -58,7 +59,7 @@ public class RecordsClientImpl(
         sort: String?,
         expand: String?,
         fields: String?,
-        skipTotal: Boolean?,
+        skipTotal: Boolean,
     ): PocketBaseResult<List<JsonObject>> {
         val aggregated = mutableListOf<JsonObject>()
         var page = 1
@@ -77,8 +78,9 @@ public class RecordsClientImpl(
             ) {
                 is PocketBaseResult.Failure -> return res
                 is PocketBaseResult.Success -> {
-                    aggregated += res.value.items
-                    if (page >= res.value.totalPages) return PocketBaseResult.Success(aggregated)
+                    val items = res.value.items
+                    aggregated += items
+                    if (items.size < batch || page >= res.value.totalPages) return PocketBaseResult.Success(aggregated)
                     page += 1
                 }
             }
@@ -87,6 +89,39 @@ public class RecordsClientImpl(
 
     override suspend fun getOne(collectionIdOrName: String, id: String, expand: String?, fields: String?): PocketBaseResult<JsonObject> =
         client.get("/api/collections/$collectionIdOrName/records/$id", mapOf("expand" to expand, "fields" to fields))
+
+    override suspend fun getFirstListItem(
+        collectionIdOrName: String,
+        filter: String,
+        expand: String?,
+        fields: String?,
+    ): PocketBaseResult<JsonObject> {
+        val listResult = getList(
+            collectionIdOrName = collectionIdOrName,
+            page = 1,
+            perPage = 1,
+            filter = filter,
+            expand = expand,
+            fields = fields,
+            skipTotal = true,
+        )
+        return when (listResult) {
+            is PocketBaseResult.Failure -> listResult
+            is PocketBaseResult.Success -> {
+                val firstItem = listResult.value.items.firstOrNull()
+                if (firstItem != null) {
+                    PocketBaseResult.Success(firstItem)
+                } else {
+                    PocketBaseResult.Failure(
+                        PocketBaseError(
+                            statusCode = 404,
+                            message = "The requested resource wasn't found.",
+                        ),
+                    )
+                }
+            }
+        }
+    }
 
     override suspend fun create(collectionIdOrName: String, body: JsonObject, expand: String?, fields: String?): PocketBaseResult<JsonObject> =
         client.post(pathWithQuery("/api/collections/$collectionIdOrName/records", "expand" to expand, "fields" to fields), body)

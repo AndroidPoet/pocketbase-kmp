@@ -38,6 +38,37 @@ class RecordsClientImplTest {
         assertEquals("/api/collections/tasks/records", client.lastPutPath)
     }
 
+    @Test
+    fun test_getFirstListItem_returnsFirstItem() = runBlocking {
+        val client = MockPocketBaseClient()
+        client.getQueue += listResponse(page = 1, totalPages = 1, "first")
+        val sut = RecordsClientImpl(client)
+
+        val result = sut.getFirstListItem(collectionIdOrName = "tasks", filter = "status='open'")
+
+        assertTrue(result is PocketBaseResult.Success)
+        assertEquals("first", result.value["id"]?.toString()?.trim('"'))
+    }
+
+    @Test
+    fun test_getFirstListItem_returns404WhenNoItemsFound() = runBlocking {
+        val client = MockPocketBaseClient()
+        client.getQueue += buildJsonObject {
+            put("page", 1)
+            put("perPage", 1)
+            put("totalItems", 0)
+            put("totalPages", 1)
+            put("items", buildJsonArray {})
+        }
+        val sut = RecordsClientImpl(client)
+
+        val result = sut.getFirstListItem(collectionIdOrName = "tasks", filter = "status='missing'")
+
+        assertTrue(result is PocketBaseResult.Failure)
+        assertEquals(404, result.error.statusCode)
+        assertTrue(result.error.message.isNotBlank())
+    }
+
     private fun listResponse(page: Int, totalPages: Int, id: String): JsonObject = buildJsonObject {
         put("page", page)
         put("perPage", 1)
