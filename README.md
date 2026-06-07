@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="art/logo.svg" width="800" alt="PocketBase KMP">
+  <img src="docs/assets/images/header.png" width="920" alt="PocketBase KMP">
 </p>
 
 <p align="center">
